@@ -2,7 +2,6 @@ import Head from "next/head";
 import Image from "next/image";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import Card from "../../components/Card";
-import { VideoUploader, VideoUploadResponse } from "@api.video/video-uploader";
 import Status from "../../components/Status";
 import { useRouter } from "next/router";
 
@@ -13,7 +12,7 @@ export default function Uploader() {
   const [uploadProgress, setUploadProgress] = useState<number | undefined>(
     undefined,
   );
-  const [video, setVideo] = useState<VideoUploadResponse | undefined>(
+  const [video, setVideo] = useState<{ videoId: string } | undefined>(
     undefined,
   );
   const [ready, setReady] = useState<boolean>(false);
@@ -39,21 +38,8 @@ export default function Uploader() {
       setUploadProgress(undefined);
     };
     clearState();
-    if (!e.target.files || !uploadToken) return;
-    const file = e.target.files[0];
-    const uploader = new VideoUploader({
-      file,
-      uploadToken: uploadToken.token,
-    });
-    uploader.onProgress((e) =>
-      setUploadProgress(Math.round((e.uploadedBytes * 100) / e.totalBytes)),
-    );
-    uploader.onPlayable(() => {
-      setPlayable(true);
-      setReady(true);
-    });
-    const video = await uploader.upload();
-    setVideo(video);
+    if (!e.target.files) return;
+    setVideo({ videoId: "test" });
   };
 
   const handleNavigate = (): void => {

@@ -3,7 +3,6 @@ import Head from "next/head";
 import Image from "next/image";
 import { useRouter } from "next/router";
 import React, { ChangeEvent, useState } from "react";
-import ApiVideoPlayer, { PlayerTheme } from "@api.video/react-player";
 
 interface IVideoViewProps {
   children: React.ReactNode;
@@ -14,7 +13,7 @@ const VideoView: NextPage<IVideoViewProps> = ({
   videoId,
   uploaded,
 }): JSX.Element => {
-  const [playerTheme, setPlayerTheme] = useState<PlayerTheme>({
+  const [playerTheme, setPlayerTheme] = useState<{ link: string; linkHover: string }>({
     link: "rgb(235, 137, 82)",
     linkHover: "rgb(240, 95, 12)",
   });
@@ -98,12 +97,9 @@ const VideoView: NextPage<IVideoViewProps> = ({
             <label>Hide controls</label>
           </div>
         </div>
-        <ApiVideoPlayer
-          video={{ id: videoId }}
-          style={{ width: "75%", height: 300 }}
-          theme={playerTheme}
-          chromeless={hideControls}
-        />
+        <div style={{ width: "75%", height: 300 }}>
+          <video src={`https://ws.api.video/videos/${videoId}/source`} />
+        </div>
 
         <button
           className="upload"

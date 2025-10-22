@@ -1,17 +1,16 @@
 import Head from "next/head";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import VideosListResponse from "@api.video/nodejs-client/lib/model/VideosListResponse";
 
 export default function Videos() {
   const [videosResponse, setVideosResponse] = useState<
-    VideosListResponse | undefined
+    { videos: { videoId: string }[] } | undefined
   >(undefined);
   const [error, setError] = useState<boolean>(false);
   useEffect(() => {
     fetch("/api/videos")
       .then((res) => res.json())
-      .then((res: { videos: VideosListResponse }) =>
+      .then((res: { videos: { videoId: string }[] }) =>
         setVideosResponse(res.videos),
       )
       .catch((_) => setError(true));

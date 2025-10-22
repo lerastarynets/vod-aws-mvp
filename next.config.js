@@ -4,14 +4,7 @@ const nextConfig = {
     styledComponents: true,
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "vod.api.video",
-        port: "",
-        pathname: "/my-account/**",
-      },
-    ],
+    remotePatterns: [],
   },
 };
 
