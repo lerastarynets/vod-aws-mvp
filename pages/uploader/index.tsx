@@ -111,7 +111,7 @@ export default function Uploader() {
 
   const handleNavigate = (): void => {
     if (!video) return;
-    router.push(`/videos/${video.videoId}?uploaded=1`);
+    router.push(`/videos/${video.videoId}`);
   };
 
   return (
@@ -204,19 +204,6 @@ export default function Uploader() {
           </button>
         )}
       </main>
-
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <span>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   );
 }
