@@ -1,6 +1,6 @@
-import { GetServerSideProps, NextPage } from "next";
-import Head from "next/head";
-import { useRouter } from "next/router";
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 
 interface VideoData {
@@ -11,20 +11,18 @@ interface VideoData {
   errorMessage?: string;
 }
 
-interface IVideoViewProps {
-  videoId: string;
-  uploaded: string;
-}
-
-const VideoView: NextPage<IVideoViewProps> = ({
+export default function VideoViewClient({
   videoId,
-  uploaded,
-}): JSX.Element => {
+}: {
+  videoId: string;
+}) {
   const [videoData, setVideoData] = useState<VideoData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const uploaded = searchParams.get("uploaded");
 
   useEffect(() => {
     const fetchVideo = async () => {
@@ -54,14 +52,6 @@ const VideoView: NextPage<IVideoViewProps> = ({
 
   return (
     <div className="global-container">
-      <Head>
-        <title>{videoData?.title || "Video view"}</title>
-        <meta
-          name="description"
-          content={videoData?.title || "Video playback"}
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <header>
         {uploaded ? (
           <>
@@ -131,11 +121,5 @@ const VideoView: NextPage<IVideoViewProps> = ({
       </main>
     </div>
   );
-};
+}
 
-export default VideoView;
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { videoId, uploaded } = context.query;
-  return { props: { videoId, uploaded: uploaded ?? null } };
-};

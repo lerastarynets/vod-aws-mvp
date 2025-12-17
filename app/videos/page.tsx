@@ -1,4 +1,5 @@
-import Head from "next/head";
+"use client";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -79,12 +80,6 @@ export default function Videos() {
 
   return (
     <div className="global-container">
-      <Head>
-        <title>Videos List</title>
-        <meta name="description" content="List of uploaded videos" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <header>
         <span>Videos List</span>
       </header>
@@ -179,3 +174,4 @@ export default function Videos() {
     </div>
   );
 }
+

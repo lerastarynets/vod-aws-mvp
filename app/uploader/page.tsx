@@ -1,8 +1,7 @@
-import Head from "next/head";
-import Image from "next/image";
+"use client";
+
 import { ChangeEvent, useRef, useState } from "react";
-import Status from "../../components/Status";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 
 interface UploadResponse {
   videoId: string;
@@ -116,15 +115,6 @@ export default function Uploader() {
 
   return (
     <div className="global-container">
-      <Head>
-        <title>Video Uploader</title>
-        <meta
-          name="description"
-          content="Upload videos to AWS S3 using presigned URLs"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <header>
         <span>Video Uploader</span> 🚀
       </header>
@@ -207,3 +197,4 @@ export default function Uploader() {
     </div>
   );
 }
+

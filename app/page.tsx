@@ -1,19 +1,15 @@
-import Head from "next/head";
 import Image from "next/image";
-import React from "react";
+import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "VOD AWS MVP",
+  description: "Video on Demand AWS MVP application",
+};
 
 export default function Home() {
   return (
     <div className="global-container">
-      <Head>
-        <title>VOD AWS MVP</title>
-        <meta
-          name="description"
-          content="Video on Demand AWS MVP application"
-        />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
       <header>
         <span>VOD AWS MVP</span>
       </header>
@@ -30,8 +26,8 @@ export default function Home() {
             >
               api.video
             </a>{" "}
-            features examples such as <a href="/uploader">video uploader</a>,{" "}
-            <a href="/videos">videos list</a> and player components.
+            features examples such as <Link href="/uploader">video uploader</Link>,{" "}
+            <Link href="/videos">videos list</Link> and player components.
           </p>
           <p>
             This application provides video streaming capabilities using AWS infrastructure.
@@ -52,12 +48,12 @@ export default function Home() {
         </div>
 
         <div className="status-container">
-          <a className="button" href="/uploader">
+          <Link href="/uploader" className="button">
             Upload a video
-          </a>
-          <a className="button" href="/videos">
+          </Link>
+          <Link href="/videos" className="button">
             See my videos
-          </a>
+          </Link>
         </div>
       </main>
 
@@ -76,3 +72,4 @@ export default function Home() {
     </div>
   );
 }
+
