@@ -37,10 +37,11 @@ export default async function GET(
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("AWS API error:", response.status, errorText);
+      const errorData = await response.json();
+      const errorText = errorData.message || response.statusText;
+      console.error("AWS API error:", response.status, errorData);
       return res.status(response.status).json({
-        error: `Failed to fetch video: ${errorText || response.statusText}`,
+        error: `Failed to fetch video: ${errorText}`,
       });
     }
 
