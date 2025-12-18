@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../style/index.css";
 import "../style/common.css";
 import Navigation from "../components/Navigation";
+import ScrollToTop from "../components/ScrollToTop";
 
 export const metadata: Metadata = {
   title: "VOD AWS MVP",
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <ScrollToTop />
         <Navigation />
         {children}
       </body>
