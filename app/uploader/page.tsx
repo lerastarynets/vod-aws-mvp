@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface UploadResponse {
   videoId: string;
@@ -116,30 +117,21 @@ export default function Uploader() {
   return (
     <div className="global-container">
       <header>
-        <span>Video Uploader</span> 🚀
+        <span>Video Uploader</span> 
       </header>
 
       <main>
         <div className="texts-container">
           <p>
-            Hey fellow dev! 👋 <br />
-            Welcome to the video uploader powered by{" "}
-            <a
-              href="https://nextjs.org/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Next.js
-            </a>{" "}
-            and AWS services.
+            Upload your videos to AWS S3 using presigned URLs.
           </p>
           <p>
-            Upload your videos directly to AWS S3 using presigned URLs.
-            <br />
             Select a video file and watch the upload progress in real-time.
+            <br />
+            Once uploaded, your video will be processed and made available for streaming.
           </p>
           <p>
-            Please select a video file to upload 🎩
+            Please select a video file to upload
           </p>
         </div>
 

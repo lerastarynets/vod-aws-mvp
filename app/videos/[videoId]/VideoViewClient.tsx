@@ -112,12 +112,14 @@ export default function VideoViewClient({
           </>
         )}
 
-        <button
-          className="upload"
-          onClick={() => router.push(uploaded ? "/uploader" : "/videos")}
-        >
-          {uploaded ? "Upload Another Video" : "Back to Videos List"}
-        </button>
+        <div style={{marginBottom: "40px" }}>
+          <button
+            className="upload"
+            onClick={() => router.push(uploaded ? "/uploader" : "/videos")}
+          >
+            {uploaded ? "Upload Another Video" : "Back to Videos List"}
+          </button>
+        </div>
       </main>
     </div>
   );

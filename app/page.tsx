@@ -17,27 +17,24 @@ export default function Home() {
       <main>
         <div className="texts-container">
           <p>
-            Hey fellow dev! 👋 <br />
-            In this basic sample app, you will find{" "}
-            <a
-              href="https://api.video"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              api.video
-            </a>{" "}
-            features examples such as <Link href="/uploader">video uploader</Link>,{" "}
-            <Link href="/videos">videos list</Link> and player components.
+            Welcome to VOD AWS MVP! 👋 <br />
+            Upload, manage, and stream your videos using AWS infrastructure.
           </p>
           <p>
-            This application provides video streaming capabilities using AWS infrastructure.
+            This application provides video streaming capabilities powered by AWS services:
+            <br />
+            • Upload videos directly to S3 using presigned URLs
+            <br />
+            • Process videos with AWS Lambda and MediaConvert
+            <br />
+            • Stream videos using HLS (HTTP Live Streaming)
             <br />
             Built with Next.js, React, and AWS services for scalable video delivery.
           </p>
           <p>
             You can{" "}
             <a
-              href="https://github.com/vercel/next.js"
+              href="https://github.com/lerastarynets/vod-aws-mvp"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -56,19 +53,6 @@ export default function Home() {
           </Link>
         </div>
       </main>
-
-      <footer>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{" "}
-          <span>
-            <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
-          </span>
-        </a>
-      </footer>
     </div>
   );
 }
