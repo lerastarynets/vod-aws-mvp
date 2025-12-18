@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import Hls from "hls.js";
 
 interface VideoData {
   videoId: string;
@@ -20,6 +21,7 @@ export default function VideoViewClient({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const uploaded = searchParams.get("uploaded");
@@ -49,6 +51,70 @@ export default function VideoViewClient({
       fetchVideo();
     }
   }, [videoId]);
+
+  // Initialize HLS when videoData.playbackUrl is available
+  useEffect(() => {
+    if (!videoData?.playbackUrl || !videoRef.current) return;
+
+    const video = videoRef.current;
+
+    // Clean up previous HLS instance
+    if (hlsRef.current) {
+      hlsRef.current.destroy();
+      hlsRef.current = null;
+    }
+
+    if (Hls.isSupported()) {
+      // Use hls.js for browsers that don't support native HLS
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+      });
+
+      hls.loadSource(videoData.playbackUrl);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch((err) => {
+          console.error("Error playing video:", err);
+        });
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              console.error("Fatal network error, trying to recover...");
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.error("Fatal media error, trying to recover...");
+              hls.recoverMediaError();
+              break;
+            default:
+              console.error("Fatal error, cannot recover");
+              hls.destroy();
+              break;
+          }
+        }
+      });
+
+      hlsRef.current = hls;
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+      // Native HLS support (Safari)
+      video.src = videoData.playbackUrl;
+    } else {
+      setError("Your browser does not support HLS playback");
+    }
+
+    // Cleanup function
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [videoData?.playbackUrl]);
 
   return (
     <div className="global-container">
@@ -93,16 +159,29 @@ export default function VideoViewClient({
                 </div>
               </div>
             ) : videoData.playbackUrl ? (
-              <div style={{ width: "100%", maxWidth: "1200px", margin: "20px auto" }}>
+              <div style={{ 
+                width: "100%", 
+                maxWidth: "1200px", 
+                margin: "20px auto",
+                minHeight: "400px",
+                height: "600px",
+                backgroundColor: "#000",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "8px",
+                overflow: "hidden"
+              }}>
                 <video
                   ref={videoRef}
                   controls
-                  style={{ width: "100%", height: "auto", maxHeight: "600px" }}
+                  style={{ 
+                    width: "100%", 
+                    height: "100%",
+                    objectFit: "contain"
+                  }}
                   playsInline
-                >
-                  <source src={videoData.playbackUrl} type="application/x-mpegURL" />
-                  Your browser does not support the video tag or HLS playback.
-                </video>
+                />
               </div>
             ) : (
               <div className="texts-container">
