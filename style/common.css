@@ -17,18 +17,6 @@ header > span {
   -webkit-text-fill-color: transparent;
 }
 
-footer {
-  margin-top: auto;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-footer > a:nth-child(3) {
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
 p {
   text-align: center;
   font-size: 1.1rem;
@@ -76,30 +64,6 @@ p > a:hover {
   font-weight: 700;
 }
 
-.videos-list {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: stretch;
-  gap: 1rem;
-}
-.videos-list .video-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 1rem 2rem;
-  box-shadow: rgb(0 0 0 / 10%) 0px 2px 4px;
-  border-radius: 5px;
-  max-width: 250px;
-  text-align: center;
-  transition: transform 200ms ease-in-out;
-}
-.videos-list .video-card:hover {
-  transform: scale(1.05);
-}
-
 button.upload,
 a.button {
   background: -webkit-linear-gradient(
@@ -131,27 +95,3 @@ a.button {
   margin-top: 20px;
 }
 
-.inputs-container {
-  display: flex;
-  gap: 20px;
-}
-.inputs-container > div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.inputs-container > div label {
-  font-size: 0.6rem;
-}
-.inputs-container > div:last-child {
-  flex-direction: row;
-  align-items: center;
-  align-self: flex-end;
-}
-
-.error {
-  color: rgb(250, 91, 48);
-}
-.error i {
-  font-weight: 600;
-}
