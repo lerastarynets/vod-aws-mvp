@@ -1,0 +1,19 @@
+{
+  "name": "@lambdas/upload-init",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/handler.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
+
