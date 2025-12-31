@@ -1,0 +1,85 @@
+name: Deploy Lambdas
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/lambdas/**"
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-central-1
+  NODE_VERSION: 24
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      lambdas: ${{ steps.changed.outputs.lambdas }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed lambdas
+        id: changed
+        run: |
+          changed=$(git diff --name-only origin/main...HEAD | grep '^apps/lambdas/' | cut -d/ -f3 | sort -u | jq -R -s -c 'split("\n")[:-1]' || echo '[]')
+          echo "lambdas=$changed" >> $GITHUB_OUTPUT
+          echo "Changed lambdas: $changed"
+
+  deploy:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.lambdas != '[]'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda: ${{ fromJson(needs.detect-changes.outputs.lambdas) }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build Lambda
+        run: |
+          npx turbo run build --filter=@lambdas/${{ matrix.lambda }}
+
+      - name: Prepare deployment package
+        working-directory: apps/lambdas/${{ matrix.lambda }}
+        run: |
+          npm ci --production
+          zip -r function.zip dist node_modules package.json -q
+
+      - name: Deploy Lambda
+        uses: aws-actions/aws-lambda-deploy@v1.1.0
+        with:
+          function-name: ${{ matrix.lambda }}
+          package: apps/lambdas/${{ matrix.lambda }}/function.zip
+          region: ${{ env.AWS_REGION }}
+          publish: true
+
+      - name: Cleanup
+        working-directory: apps/lambdas/${{ matrix.lambda }}
+        run: |
+          rm -f function.zip
+          rm -rf node_modules
