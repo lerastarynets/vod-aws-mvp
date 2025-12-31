@@ -29,7 +29,21 @@ jobs:
       - name: Detect changed lambdas
         id: changed
         run: |
-          changed=$(git diff --name-only origin/main...HEAD | grep '^apps/lambdas/' | cut -d/ -f3 | sort -u | jq -R -s -c 'split("\n")[:-1]' || echo '[]')
+          # Determine the base commit to compare against
+          if [ "${{ github.event.before }}" != "0000000000000000000000000000000000000000" ] && [ -n "${{ github.event.before }}" ]; then
+            BASE="${{ github.event.before }}"
+            HEAD_SHA="${{ github.sha }}"
+          else
+            # Fallback: use previous commit
+            BASE="HEAD~1"
+            HEAD_SHA="HEAD"
+          fi
+          
+          echo "Comparing: $BASE..$HEAD_SHA"
+          
+          # Get changed Lambda directories
+          changed=$(git diff --name-only $BASE..$HEAD_SHA 2>/dev/null | grep '^apps/lambdas/' | cut -d/ -f3 | sort -u | jq -R -s -c 'split("\n")[:-1]' || echo '[]')
+          
           echo "lambdas=$changed" >> $GITHUB_OUTPUT
           echo "Changed lambdas: $changed"
 
