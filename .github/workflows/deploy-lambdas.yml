@@ -88,8 +88,10 @@ jobs:
         uses: aws-actions/aws-lambda-deploy@v1.1.0
         with:
           function-name: ${{ matrix.lambda }}
-          package: apps/lambdas/${{ matrix.lambda }}/function.zip
-          region: ${{ env.AWS_REGION }}
+          package-type: Zip
+          code-artifacts-dir: apps/lambdas/${{ matrix.lambda }}
+          handler: dist/handler.handler
+          runtime: nodejs24.x
           publish: true
 
       - name: Cleanup
