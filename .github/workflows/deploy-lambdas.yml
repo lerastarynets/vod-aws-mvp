@@ -87,7 +87,7 @@ jobs:
       - name: Deploy Lambda
         uses: aws-actions/aws-lambda-deploy@v1.1.0
         with:
-          function-name: ${{ matrix.lambda }}
+          function-name: vod-${{ matrix.lambda }}
           package-type: Zip
           code-artifacts-dir: apps/lambdas/${{ matrix.lambda }}
           handler: dist/handler.handler
