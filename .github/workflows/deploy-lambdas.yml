@@ -83,14 +83,6 @@ jobs:
         run: |
           mv dist/handler.js dist/index.mjs
 
-      # - name: Prepare deployment package
-      #   working-directory: apps/lambdas/${{ matrix.lambda }}
-      #   run: |
-      #     npm ci --production
-      #     # Create a clean deployment directory with only what Lambda needs
-      #     mkdir -p .lambda-deploy
-      #     cp -r dist node_modules package.json .lambda-deploy/
-
       - name: Deploy Lambda
         uses: aws-actions/aws-lambda-deploy@v1.1.0
         with:
@@ -100,9 +92,3 @@ jobs:
           handler: index.handler
           runtime: nodejs24.x
           publish: true
-
-      # - name: Cleanup
-      #   working-directory: apps/lambdas/${{ matrix.lambda }}
-      #   run: |
-      #     rm -rf .lambda-deploy
-      #     rm -rf node_modules
