@@ -25,6 +25,8 @@ export const handler = async (event: APIGatewayEvent) => {
         body: JSON.stringify({ message: "videoId is required" })
       };
     }
+
+    console.log(`Getting video ${videoId}`);
     
     const result = await ddb.send(
       new GetItemCommand({
