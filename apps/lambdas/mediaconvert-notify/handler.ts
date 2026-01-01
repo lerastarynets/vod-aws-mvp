@@ -20,7 +20,6 @@ export const handler = async (event: EventBridgeEvent) => {
     const videoId = detail.userMetadata?.videoId;
 
     console.log(`Received event for video ${videoId} with status ${status}`);
-    console.log(`User metadata: ${detail.userMetadata}`);
     if (!videoId) return;
 
     if (status === "COMPLETE") {
