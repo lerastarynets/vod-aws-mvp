@@ -78,6 +78,11 @@ jobs:
         run: |
           npx turbo run build --filter=@lambdas/${{ matrix.lambda }}
 
+      - name: Rename handler to index.mjs
+        working-directory: apps/lambdas/${{ matrix.lambda }}
+        run: |
+          mv dist/handler.js dist/index.mjs
+
       # - name: Prepare deployment package
       #   working-directory: apps/lambdas/${{ matrix.lambda }}
       #   run: |
