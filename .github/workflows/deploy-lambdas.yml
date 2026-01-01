@@ -78,24 +78,26 @@ jobs:
         run: |
           npx turbo run build --filter=@lambdas/${{ matrix.lambda }}
 
-      - name: Prepare deployment package
-        working-directory: apps/lambdas/${{ matrix.lambda }}
-        run: |
-          npm ci --production
-          zip -r function.zip dist node_modules package.json -q
+      # - name: Prepare deployment package
+      #   working-directory: apps/lambdas/${{ matrix.lambda }}
+      #   run: |
+      #     npm ci --production
+      #     # Create a clean deployment directory with only what Lambda needs
+      #     mkdir -p .lambda-deploy
+      #     cp -r dist node_modules package.json .lambda-deploy/
 
       - name: Deploy Lambda
         uses: aws-actions/aws-lambda-deploy@v1.1.0
         with:
           function-name: vod-${{ matrix.lambda }}
           package-type: Zip
-          code-artifacts-dir: apps/lambdas/${{ matrix.lambda }}
-          handler: dist/handler.handler
+          code-artifacts-dir: apps/lambdas/${{ matrix.lambda }}/dist
+          handler: index.handler
           runtime: nodejs24.x
           publish: true
 
-      - name: Cleanup
-        working-directory: apps/lambdas/${{ matrix.lambda }}
-        run: |
-          rm -f function.zip
-          rm -rf node_modules
+      # - name: Cleanup
+      #   working-directory: apps/lambdas/${{ matrix.lambda }}
+      #   run: |
+      #     rm -rf .lambda-deploy
+      #     rm -rf node_modules
