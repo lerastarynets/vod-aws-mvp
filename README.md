@@ -1,87 +1,28 @@
-# VOD AWS MVP - Turbo Monorepo
+# VOD AWS MVP
 
-This is a Turbo monorepo containing a Next.js video on demand application built with AWS services.
+A video-on-demand streaming MVP. Users upload videos, they get transcoded to HLS, and streamed via CloudFront. Turbo monorepo: Next.js app in `apps/web`, AWS Lambda handlers in `apps/lambdas`. Backend is serverless on AWS; the frontend calls API Gateway (Next.js API routes in the repo proxy to it).
 
-## Project Structure
+**Pipeline:** Frontend requests a presigned S3 URL from API Gateway (`upload-init` Lambda). That Lambda creates a `videoId`, writes a **PENDING** row in DynamoDB, returns the presigned URL. User uploads the file straight to the uploads bucket. S3 triggers the `transcode-trigger` Lambda, which starts a MediaConvert HLS job (output goes to an S3 outputs bucket, one folder per `videoId`). DynamoDB status → **PROCESSING**. When MediaConvert finishes, EventBridge runs the `mediaconvert-notify` Lambda, which sets the row to **READY** with the path to `index.m3u8` or to **ERROR**. `get-video` Lambda returns one video by ID plus a CloudFront playback URL. `list-videos` Lambda scans DynamoDB with pagination (`nextToken`) for the infinite-scroll list. CloudFront serves the outputs bucket (Origin Access Control, bucket private). WAF on CloudFront. IAM least-privilege per Lambda.
 
-```
-.
-├── apps/
-│   └── web/          # Next.js application
-├── packages/         # Shared packages (future)
-├── turbo.json        # Turbo configuration
-└── package.json      # Root package.json
-```
+**Repo:**
 
-## Getting Started
+- **`apps/web`** — Next.js App Router app: upload page, videos list, video watch page with HLS player and quality selector. API routes under `app/api` proxy to AWS.
+- **`apps/lambdas`** — One package per Lambda: `upload-init`, `transcode-trigger`, `mediaconvert-notify`, `get-video`, `list-videos`. TypeScript, build to `dist`, deployed by GitHub Actions on push to `main` when `apps/lambdas` changes (`vod-<name>` in eu-central-1, Node 24).
+- **`packages`** — Reserved for shared code (unused in this MVP).
 
-### Prerequisites
+## Getting started
 
-- Node.js 18+ 
-- npm 10+
-
-### Installation
-
-1. Install dependencies from the root:
-
-```bash
-npm install
-```
-
-This will install dependencies for all workspaces.
-
-### Development
-
-Run the development server:
-
-```bash
-npm run dev
-```
-
-This will start the Next.js app in development mode using Turbo.
-
-### Building
-
-Build all apps:
-
-```bash
-npm run build
-```
-
-### Other Commands
-
-- `npm run lint` - Lint all apps
-- `npm run start` - Start production server
-- `npm run clean` - Clean build artifacts
-
-## Workspaces
-
-### apps/web
-
-The main Next.js application for video upload and streaming.
-
-**Features:**
-- Upload videos directly to S3 using presigned URLs
-- Process videos with AWS Lambda and MediaConvert
-- Stream videos using HLS (HTTP Live Streaming)
-- Built with Next.js, React, and AWS services
-
-**Environment Variables:**
-
-Create a `.env.local` file in `apps/web/` with:
-
-```
-AWS_API_BASE_URL=your-api-gateway-url
-```
+- **Prerequisites:** Node.js 18+, npm 10+.
+- From repo root: `npm install`. Copy `.env.local.example` to `apps/web/.env.local`, set `AWS_API_BASE_URL`.
+- `npm run dev` — run the web app.  
+  `npm run build` | `npm run start` | `npm run lint` | `npm run clean`.
 
 ## Deployment
 
-The monorepo is configured to work with Vercel. Deploy the `apps/web` directory as your Next.js application.
+- Deploy `apps/web` to Vercel (or similar).
+- Lambdas deploy via GitHub Actions on push to `main` when `apps/lambdas` changes. Set repo secret **AWS_ROLE_ARN** for AWS OIDC.
 
-## Tech Stack
+## Tech stack
 
-- **Framework:** Next.js 16
-- **Monorepo:** Turbo
-- **Language:** TypeScript
-- **Styling:** CSS Modules
-- **Video Streaming:** HLS.js
+- **Frontend:** Next.js 16, TypeScript, Turbo, CSS Modules, HLS.js.
+- **Backend (AWS):** API Gateway, Lambda, S3, DynamoDB, MediaConvert, EventBridge, CloudFront, WAF.
