@@ -36,6 +36,7 @@ export const handler = async (event: APIGatewayEvent) => {
         TableName: process.env.TABLE_NAME,
         Item: {
           videoId: { S: videoId },
+          entityType: { S: "VIDEO" },
           title: { S: title },
           status: { S: "PENDING" },
           inputKey: { S: uploadKey },
