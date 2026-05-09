@@ -132,7 +132,7 @@ graph TB
 | `transcode-trigger`   | S3 `ObjectCreated`                      | Starts MediaConvert HLS job using a Job Template; updates DynamoDB to PROCESSING                        |
 | `mediaconvert-notify` | EventBridge (MediaConvert state change) | Sets DynamoDB to READY (with `outputKey`) or ERROR                                                      |
 | `get-video`           | API Gateway GET                         | Fetches single video metadata + constructs CloudFront playback URL                                      |
-| `list-videos`         | API Gateway GET                         | Queries `entityType-createdAt-index` GSI (newest-first) with `nextToken` pagination for infinite scroll |
+| `list-videos`         | API Gateway GET                         | Queries  GSI (newest-first) with `nextToken` pagination for infinite scroll |
 
 
 ### AWS Services
@@ -143,7 +143,7 @@ graph TB
 | **S3 (uploads bucket)** | Receives raw video files via presigned URL. Private; only Lambda has read access.                                                                                                                     |
 | **S3 (outputs bucket)** | Stores MediaConvert HLS output (`{videoId}/index*.m3u8`, `.ts` segments). Private; served only via CloudFront OAC.                                                                                    |
 | **MediaConvert**        | Transcodes raw video to HLS using a pre-configured Job Template. Outputs per-video folder.                                                                                                            |
-| **DynamoDB**            | Metadata store. Single table, `videoId` as partition key. Tracks status lifecycle. GSI `entityType-createdAt-index` (PK: `entityType`, SK: `createdAt`) enables efficient newest-first video listing. |
+| **DynamoDB**            | Metadata store. Single table, `videoId` as partition key. Tracks status lifecycle. GSI (PK: `entityType`, SK: `createdAt`) enables efficient newest-first video listing. |
 | **EventBridge**         | Routes MediaConvert job completion/failure events to `mediaconvert-notify` Lambda.                                                                                                                    |
 | **CloudFront + WAF**    | Global CDN for HLS delivery. Origin Access Control locks down the outputs bucket. WAF provides rate limiting and basic request filtering.                                                             |
 | **API Gateway**         | HTTP API fronting all Lambda functions.                                                                                                                                                               |
@@ -505,7 +505,7 @@ outputs-bucket/
 
 ### Database
 
-- **DynamoDB** scales on-demand. The `list-videos` endpoint now uses a `Query` on the `entityType-createdAt-index` GSI, reading only the requested page of items in newest-first order. The previous full-table `Scan` has been replaced.
+- **DynamoDB** scales on-demand. The `list-videos` endpoint now uses a `Query` on the  GSI, reading only the requested page of items in newest-first order. The previous full-table `Scan` has been replaced.
 - **Scale path:** The GSI's single partition (`entityType = "VIDEO"`) is fine for MVP and moderate scale. For very large catalogs, shard the partition key (e.g. by month: `"VIDEO#2026-05"`) and query across shards in parallel.
 
 ### Availability
