@@ -1,28 +1,63 @@
 # VOD AWS MVP
 
-A video-on-demand streaming MVP. Users upload videos, they get transcoded to HLS, and streamed via CloudFront. Turbo monorepo: Next.js app in `apps/web`, AWS Lambda handlers in `apps/lambdas`. Backend is serverless on AWS; the frontend calls API Gateway (Next.js API routes in the repo proxy to it).
+Serverless video-on-demand MVP on AWS. Users upload videos, the pipeline transcodes them to HLS, and playback is delivered through CloudFront.
 
-**Pipeline:** Frontend requests a presigned S3 URL from API Gateway (`upload-init` Lambda). That Lambda creates a `videoId`, writes a **PENDING** row in DynamoDB, returns the presigned URL. User uploads the file straight to the uploads bucket. S3 triggers the `transcode-trigger` Lambda, which starts a MediaConvert HLS job (output goes to an S3 outputs bucket, one folder per `videoId`). DynamoDB status → **PROCESSING**. When MediaConvert finishes, EventBridge runs the `mediaconvert-notify` Lambda, which sets the row to **READY** with the path to `index.m3u8` or to **ERROR**. `get-video` Lambda returns one video by ID plus a CloudFront playback URL. `list-videos` Lambda scans DynamoDB with pagination (`nextToken`) for the infinite-scroll list. CloudFront serves the outputs bucket (Origin Access Control, bucket private). WAF on CloudFront. IAM least-privilege per Lambda.
+## What this project does
 
-**Repo:**
+- Accepts video uploads from the web app using presigned S3 URLs.
+- Triggers automatic transcoding with MediaConvert.
+- Tracks video lifecycle in DynamoDB (`PENDING` -> `PROCESSING` -> `READY` / `ERROR`).
+- Serves video metadata and playback URLs through API Gateway + Lambda.
+- Streams HLS output through CloudFront.
 
-- **`apps/web`** — Next.js App Router app: upload page, videos list, video watch page with HLS player and quality selector. API routes under `app/api` proxy to AWS.
-- **`apps/lambdas`** — One package per Lambda: `upload-init`, `transcode-trigger`, `mediaconvert-notify`, `get-video`, `list-videos`. TypeScript, build to `dist`, deployed by GitHub Actions on push to `main` when `apps/lambdas` changes (`vod-<name>` in eu-central-1, Node 24).
-- **`packages`** — Reserved for shared code (unused in this MVP).
+## Repository layout
+
+- **`apps/web`** — Next.js App Router frontend (upload page, videos list, single video page with HLS player).
+- **`apps/lambdas`** — Lambda packages:
+  - `upload-init`
+  - `transcode-trigger`
+  - `mediaconvert-notify`
+  - `get-video`
+  - `list-videos`
+- **`packages`** — Shared packages (reserved for future use).
+
+## API and data flow
+
+- The frontend calls Next.js API routes under `apps/web/app/api/*`.
+- Those routes proxy to AWS API Gateway using `AWS_API_BASE_URL`.
+- `upload-init` creates a `videoId`, writes a DynamoDB item with `entityType = VIDEO`, and returns a presigned upload URL.
+- `transcode-trigger` starts a MediaConvert job when a new file lands in S3.
+- `mediaconvert-notify` updates DynamoDB with final status and `outputKey`.
+- `list-videos` reads newest-first using a DynamoDB GSI `Query` with pagination (`nextToken`).
+- `get-video` returns one video and a CloudFront playback URL when ready.
 
 ## Getting started
 
-- **Prerequisites:** Node.js 18+, npm 10+.
-- From repo root: `npm install`. Copy `.env.local.example` to `apps/web/.env.local`, set `AWS_API_BASE_URL`.
-- `npm run dev` — run the web app.  
-  `npm run build` | `npm run start` | `npm run lint` | `npm run clean`.
+- Prerequisites: Node.js 18+, npm 10+.
+- Install dependencies from repo root:
+  - `npm install`
+- Configure web app environment variables in `apps/web/.env.local`:
+  - `AWS_API_BASE_URL=<your-api-gateway-base-url>`
+- Run locally:
+  - `npm run dev`
+- Other commands:
+  - `npm run build`
+  - `npm run start`
+  - `npm run lint`
+  - `npm run clean`
 
 ## Deployment
 
-- Deploy `apps/web` to Vercel (or similar).
-- Lambdas deploy via GitHub Actions on push to `main` when `apps/lambdas` changes. Set repo secret **AWS_ROLE_ARN** for AWS OIDC.
+- Frontend: deploy `apps/web` to Vercel (or equivalent).
+- Lambdas: GitHub Actions deploys changed Lambda packages on push to `main` when files under `apps/lambdas/**` change.
+- GitHub Actions requires `AWS_ROLE_ARN` secret for AWS OIDC auth.
+
+## Documentation
+
+- Full architecture, diagrams, ADRs, and observability details: [`ARCHITECTURE.md`](./ARCHITECTURE.md)
 
 ## Tech stack
 
-- **Frontend:** Next.js 16, TypeScript, Turbo, CSS Modules, HLS.js.
-- **Backend (AWS):** API Gateway, Lambda, S3, DynamoDB, MediaConvert, EventBridge, CloudFront, WAF.
+- Frontend: Next.js 16, React 18, TypeScript, HLS.js
+- Backend: API Gateway, Lambda, S3, DynamoDB, MediaConvert, EventBridge, CloudFront, WAF
+- Tooling: Turbo monorepo, GitHub Actions
